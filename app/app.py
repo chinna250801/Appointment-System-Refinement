@@ -175,6 +175,12 @@ def patient_register_page() -> rx.Component:
                 "placeholder": "Choose a username",
             },
             {
+                "label": "Full Name",
+                "name": "name",
+                "type": "text",
+                "placeholder": "Enter your full name",
+            },
+            {
                 "label": "Email Address",
                 "name": "email",
                 "type": "email",
@@ -253,6 +259,20 @@ def admin_appointments_page() -> rx.Component:
     return admin_dashboard_layout(content)
 
 
+def admin_calendar_page() -> rx.Component:
+    from app.components.calendar_view import calendar_view
+
+    content = rx.el.div(
+        rx.el.h1("Calendar Management", class_name="text-3xl font-bold text-gray-800"),
+        rx.el.p(
+            "View and manage provider schedules and appointments.",
+            class_name="text-gray-600 mt-2 mb-6",
+        ),
+        calendar_view(),
+    )
+    return admin_dashboard_layout(content)
+
+
 def placeholder_dashboard(title: str) -> rx.Component:
     return rx.el.div(
         rx.el.h1(f"{title} Dashboard", class_name="text-3xl font-bold text-gray-800"),
@@ -295,6 +315,7 @@ app.add_page(admin_patients_page, route="/admin/patients", on_load=AuthState.che
 app.add_page(
     admin_appointments_page, route="/admin/appointments", on_load=AuthState.check_auth
 )
+app.add_page(admin_calendar_page, route="/admin/calendar", on_load=AuthState.check_auth)
 app.add_page(
     lambda: placeholder_dashboard("Doctor"),
     route="/doctor/dashboard",

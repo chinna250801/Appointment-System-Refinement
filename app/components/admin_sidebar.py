@@ -29,9 +29,10 @@ def admin_sidebar() -> rx.Component:
                 ),
                 rx.el.nav(
                     rx.foreach(AdminState.sidebar_items, _sidebar_item),
-                    class_name="flex flex-col gap-1 px-2 text-sm font-medium",
+                    class_name="grid items-start px-2 text-sm font-medium",
                 ),
                 class_name="flex-1 py-4",
+                on_mount=AdminState.get_patients,
             ),
             rx.el.div(
                 rx.el.button(

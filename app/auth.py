@@ -3,7 +3,7 @@ from typing import Any
 import logging
 import httpx
 from app.models import Role
-from app.api_client import get_api_client
+from app.api_client import APIClient
 
 
 class AuthState(rx.State):
@@ -25,16 +25,12 @@ class AuthState(rx.State):
             self.logout()
             return
         try:
-            api_client = get_api_client()
+            api_client = APIClient(token=self.token)
             user_data = await api_client.get_current_user()
             self.user_info = user_data
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 401:
-                logging.warning("Token is invalid or expired, logging out.")
-                self.logout()
-            else:
-                logging.exception(f"Failed to update user info: {e}")
-                self.logout()
+        except (httpx.HTTPStatusError, ValueError) as e:
+            logging.exception(f"Token validation failed, logging out: {e}")
+            self.logout()
 
     @rx.event
     def logout(self):
@@ -78,13 +74,8 @@ class AuthState(rx.State):
             return rx.toast.error("Username and password are required.")
         self.is_loading = True
         try:
-            api_client = get_api_client()
-            response = await api_client.client.post(
-                f"{api_client.client.base_url}/api/auth/login",
-                data={"username": username, "password": password},
-            )
-            response.raise_for_status()
-            data = response.json()
+            api_client = APIClient()
+            data = await api_client.login(username=username, password=password)
             self.token = data["access_token"]
             self.user_info = data["user"]
             role = Role(self.user_info["role"])
@@ -100,6 +91,8 @@ class AuthState(rx.State):
                 return rx.redirect("/patient/dashboard")
         except (httpx.HTTPStatusError, ValueError) as e:
             logging.exception(f"Login failed: {e}")
+            self.token = ""
+            self.user_info = {}
             return rx.toast.error("Invalid credentials or not authorized.")
         finally:
             self.is_loading = False
@@ -121,7 +114,7 @@ class AuthState(rx.State):
             return rx.toast.error("Username, email, and password are required.")
         self.is_loading = True
         try:
-            api_client = get_api_client()
+            api_client = APIClient()
             data = await api_client.register(form_data)
             self.token = data["access_token"]
             self.user_info = data["user"]

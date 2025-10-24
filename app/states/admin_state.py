@@ -1,9 +1,9 @@
 import reflex as rx
-from typing import TypedDict, Any
+from typing import TypedDict
 import logging
 import httpx
-from app.api_client import get_api_client
-from app.models import Patient
+from app.api_client import APIClient, Patient
+from app.auth import AuthState
 
 
 class SidebarItem(TypedDict):
@@ -15,12 +15,17 @@ class SidebarItem(TypedDict):
 class AdminState(rx.State):
     sidebar_items: list[SidebarItem] = [
         {"name": "Dashboard", "icon": "layout-dashboard", "route": "/admin/dashboard"},
+        {"name": "Calendar", "icon": "calendar-days", "route": "/admin/calendar"},
+        {
+            "name": "Appointments",
+            "icon": "calendar-check",
+            "route": "/admin/appointments",
+        },
         {"name": "Departments", "icon": "building", "route": "/admin/departments"},
         {"name": "Doctors", "icon": "stethoscope", "route": "/admin/doctors"},
         {"name": "Patients", "icon": "user", "route": "/admin/patients"},
-        {"name": "Appointments", "icon": "calendar", "route": "/admin/appointments"},
     ]
-    patients: list[dict[str, dict]] = []
+    patients: list[Patient] = []
     is_loading: bool = False
     is_saving: bool = False
     is_deleting: bool = False
@@ -29,11 +34,10 @@ class AdminState(rx.State):
     async def get_patients(self):
         self.is_loading = True
         try:
-            api_client = get_api_client()
-            response = await api_client.client.get("/api/patients")
-            response.raise_for_status()
-            self.patients = response.json()
-        except httpx.HTTPError as e:
+            auth_state = await self.get_state(AuthState)
+            api_client = APIClient(token=auth_state.token)
+            self.patients = await api_client.get_patients()
+        except (httpx.HTTPError, ValueError) as e:
             logging.exception(f"Failed to fetch patients: {e}")
             return rx.toast.error("Could not load patients.")
         finally:
