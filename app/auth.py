@@ -80,22 +80,22 @@ class AuthState(rx.State):
             await self._update_user_info_from_token()
         current_path = self.router.page.path
         public_paths = ["/", "/staff/login", "/patient/login", "/patient/register"]
+        auth_pages = ["/staff/login", "/patient/login", "/patient/register"]
         if not self.is_authenticated and current_path not in public_paths:
             if current_path.startswith("/admin") or current_path.startswith("/doctor"):
                 return rx.redirect("/staff/login")
             if current_path.startswith("/patient"):
                 return rx.redirect("/patient/login")
             return rx.redirect("/")
-        if self.is_authenticated and current_path == "/":
-            role = self.user_role
-            if role == Role.ADMIN:
-                return rx.redirect("/admin/dashboard")
-            elif role == Role.DOCTOR:
-                return rx.redirect("/doctor/dashboard")
-            elif role == Role.PATIENT:
-                return rx.redirect("/patient/dashboard")
         if self.is_authenticated:
             role = self.user_role
+            if current_path == "/" or current_path in auth_pages:
+                if role == Role.ADMIN:
+                    return rx.redirect("/admin/dashboard")
+                elif role == Role.DOCTOR:
+                    return rx.redirect("/doctor/dashboard")
+                elif role == Role.PATIENT:
+                    return rx.redirect("/patient/dashboard")
             if role == Role.ADMIN and (not current_path.startswith("/admin")):
                 return rx.redirect("/admin/dashboard")
             elif role == Role.DOCTOR and (not current_path.startswith("/doctor")):
