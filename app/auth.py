@@ -86,25 +86,21 @@ class AuthState(rx.State):
             if current_path.startswith("/patient"):
                 return rx.redirect("/patient/login")
             return rx.redirect("/")
+        if self.is_authenticated and current_path == "/":
+            role = self.user_role
+            if role == Role.ADMIN:
+                return rx.redirect("/admin/dashboard")
+            elif role == Role.DOCTOR:
+                return rx.redirect("/doctor/dashboard")
+            elif role == Role.PATIENT:
+                return rx.redirect("/patient/dashboard")
         if self.is_authenticated:
             role = self.user_role
-            if (
-                role == Role.ADMIN
-                and (not current_path.startswith("/admin"))
-                and (current_path not in ["/"])
-            ):
+            if role == Role.ADMIN and (not current_path.startswith("/admin")):
                 return rx.redirect("/admin/dashboard")
-            elif (
-                role == Role.DOCTOR
-                and (not current_path.startswith("/doctor"))
-                and (current_path not in ["/"])
-            ):
+            elif role == Role.DOCTOR and (not current_path.startswith("/doctor")):
                 return rx.redirect("/doctor/dashboard")
-            elif (
-                role == Role.PATIENT
-                and (not current_path.startswith("/patient"))
-                and (current_path not in ["/"])
-            ):
+            elif role == Role.PATIENT and (not current_path.startswith("/patient")):
                 return rx.redirect("/patient/dashboard")
 
     @rx.event

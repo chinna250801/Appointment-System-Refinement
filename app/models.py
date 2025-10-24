@@ -55,7 +55,7 @@ class Patient(SQLModel, table=True):
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     user_id: int = Field(foreign_key="user.id")
     user: "User" = Relationship(back_populates="patient")
-    appointments: list["Appointment"] = Relationship(back_populates="appointments")
+    appointments: list["Appointment"] = Relationship(back_populates="patient")
 
 
 class Appointment(SQLModel, table=True):

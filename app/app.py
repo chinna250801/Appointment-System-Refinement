@@ -243,6 +243,16 @@ def admin_doctors_page() -> rx.Component:
     return admin_dashboard_layout(content)
 
 
+def admin_patients_page() -> rx.Component:
+    content = rx.el.h1("Patient Management")
+    return admin_dashboard_layout(content)
+
+
+def admin_appointments_page() -> rx.Component:
+    content = rx.el.h1("Appointment Management")
+    return admin_dashboard_layout(content)
+
+
 def placeholder_dashboard(title: str) -> rx.Component:
     return rx.el.div(
         rx.el.h1(f"{title} Dashboard", class_name="text-3xl font-bold text-gray-800"),
@@ -281,6 +291,10 @@ app.add_page(
     admin_departments_page, route="/admin/departments", on_load=AuthState.check_auth
 )
 app.add_page(admin_doctors_page, route="/admin/doctors", on_load=AuthState.check_auth)
+app.add_page(admin_patients_page, route="/admin/patients", on_load=AuthState.check_auth)
+app.add_page(
+    admin_appointments_page, route="/admin/appointments", on_load=AuthState.check_auth
+)
 app.add_page(
     lambda: placeholder_dashboard("Doctor"),
     route="/doctor/dashboard",
