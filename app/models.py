@@ -39,8 +39,8 @@ class Doctor(SQLModel, table=True):
     specialization: str
     contact_info: Optional[str] = None
     google_calendar_id: Optional[str] = None
-    department_id: int = Field(foreign_key="department.id")
-    department: "Department" = Relationship(back_populates="doctors")
+    department_id: Optional[int] = Field(default=None, foreign_key="department.id")
+    department: Optional["Department"] = Relationship(back_populates="doctors")
     user_id: int = Field(foreign_key="user.id")
     user: "User" = Relationship(back_populates="doctor")
     appointments: list["Appointment"] = Relationship(back_populates="doctor")

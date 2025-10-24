@@ -1,4 +1,5 @@
 import reflex as rx
+import os
 
 
 class Config(rx.Config):
@@ -6,4 +7,4 @@ class Config(rx.Config):
 
 
 config = Config(app_name="app", plugins=[rx.plugins.TailwindV3Plugin()])
-API_URL = "/api"
+BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8000")
